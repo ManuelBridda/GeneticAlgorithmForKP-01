@@ -1,4 +1,4 @@
-package genetic.algorithm;
+package genetic_algorithm;
 
 public class Main {
 
