@@ -4,6 +4,12 @@ public class Chromosome {
 	int[] chromosome ;
 
 
+/**
+ * Initialize a random sequence of 0-1 values: the genes of a Chromosome. 
+ * The instance_dimension value is equal to the sequence lenght of the Chromosome.
+ * @param instance_dimension
+ * @return Chromosome
+ */
 public static Chromosome buildChromosome(int instance_dimension) {
 	
 	Chromosome x = new Chromosome();
@@ -14,6 +20,13 @@ public static Chromosome buildChromosome(int instance_dimension) {
 	return x;
 }
 
+
+/**Initialize a population of population_dimension Chromosomes whose genes lenght is equal to instance_dimension
+ * @param population_dimension
+ * @param instance_dimension
+ * @return Chromosome []
+ * 
+ */
 public static Chromosome[] buildChromosomePopulation(int population_dimension, int instance_dimension) {
 	
 	Chromosome[] population = new Chromosome[population_dimension];
@@ -24,6 +37,9 @@ public static Chromosome[] buildChromosomePopulation(int population_dimension, i
 	return population;
 }
 
+/**Given a population of Chromosomes, list all the genes of each chromosome in a fancy way 
+ * @param population
+ */
 public static void printPopulation(Chromosome[] population) {
 
 	for (int i=0; i<population.length; i++) {
@@ -34,8 +50,13 @@ public static void printPopulation(Chromosome[] population) {
 		}
 		System.out.print("\n");
 	}
-}
-
+}  
+/**Given a population of Chromosomes, list all the genes of each Chromosome in a fancy way with information about 
+ * profit and total weight
+ * @param population
+ * @param profits
+ * @param weights
+ */
 public static void printPopulation(Chromosome[] population, int[] profits, int [] weights) {
 	int total_profit;
 	int total_weight;
@@ -53,6 +74,13 @@ public static void printPopulation(Chromosome[] population, int[] profits, int [
 	}
 }
 
+/**Given a population of Chromosomes, randomly modificy each Chromosome for being feasibile to the capacity
+ * constraint of the Knapsack Problem
+ * @param population
+ * @param weights
+ * @param capacity
+ * @return Chromosome []
+ */
 public static Chromosome[] validateChromosomePopulation(Chromosome[] population, int[] weights, int capacity) {
 	
 	for (int i=0; i<population.length; i++) {
@@ -72,6 +100,13 @@ public static Chromosome[] validateChromosomePopulation(Chromosome[] population,
 	
 }
 
+/**Given a Chromosome, randomly modificy it for being feasibile to the capacity
+ * constraint of the Knapsack Problem
+ * @param wrong_chromosome
+ * @param weights
+ * @param capacity
+ * @return Chromosome
+ */
 public static Chromosome validateChromosome(Chromosome wrong_chromosome, int [] weights, int capacity) {
 	boolean changed = false;
 	while (!changed) {
