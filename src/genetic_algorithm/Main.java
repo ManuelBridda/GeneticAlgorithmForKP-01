@@ -12,11 +12,12 @@ public class Main {
 		int capacity = 30;
 		
 		//Computations
-		Chromosome[] population = Chromosome.buildChromosomePopulation(population_dimension,instance_dimension);
-		Chromosome.printPopulation(population, profits, weights);
+		Chromosome[] population = Chromosome.buildChromosomePopulation(population_dimension,instance_dimension,profits,weights);
+		Chromosome.printPopulation(population);
 		System.out.println("");
-		Chromosome.validateChromosomePopulation(population, weights, capacity);
-		Chromosome.printPopulation(population, profits, weights);
+		Chromosome.validateChromosomePopulation(population, profits, weights, capacity);
+		Chromosome.printPopulation(population);
+		Chromosome.defineChromosomesRanges(population);
 
 	}
 
