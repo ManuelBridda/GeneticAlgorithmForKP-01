@@ -268,7 +268,7 @@ population = Chromosome.validateChromosomePopulation(population, profits, weight
 population = Chromosome.sortPopulation(population);
 //Chromosome.printPopulation(population);
 best_solution_so_far=population[0].profit;
-System.out.println("best_solution_so_far: "+best_solution_so_far);
+System.out.println("Best solution so far: "+best_solution_so_far);
 
 
 while(counter<stop_iteration) {
@@ -280,11 +280,12 @@ while(counter<stop_iteration) {
 	}
 	else {
 		best_solution_so_far = population[0].profit;
-		System.out.println("best_solution_so_far: "+best_solution_so_far+" after "+counter+" iterations");
+		System.out.println("Best solution so far = "+best_solution_so_far+" after "+counter+" iterations");
 		counter=0;
 	}
 }
-System.out.println("The best solution found is: "+best_solution_so_far);
+System.out.println("<<Stopped after "+counter+ " iterations without solution's value improvement>>\n");
+System.out.println("The best solution found is: "+best_solution_so_far+" with a weight of: "+population[0].weight);
 Chromosome.printChromosome(population[0]);
 }
 
