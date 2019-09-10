@@ -52,6 +52,12 @@ public static Chromosome[] buildChromosomePopulation(int population_dimension, i
  * profit and total weight
  * @param population
  */
+
+public static void printChromosome(Chromosome chromosome) {
+	for (int j=0; j<chromosome.chromosome.length;j++) {
+		System.out.print("["+chromosome.chromosome[j]+"]");
+	}
+}
 public static void printPopulation(Chromosome[] population) {
 	for (int i=0; i<population.length; i++) {
 		System.out.print(i+1);
@@ -252,6 +258,34 @@ public static Chromosome[] reducePopulation(Chromosome[] population, int populat
 		}
 	}
 	return reducedPopulation;
+}
+
+public static void resolveProblem(int population_dimension, int instance_dimension, int[] profits, int[] weights, int capacity, int child_per_breed, int stop_iteration) {
+int counter = 0;
+int best_solution_so_far=0;
+Chromosome[] population = Chromosome.buildChromosomePopulation(population_dimension,instance_dimension,profits,weights);
+population = Chromosome.validateChromosomePopulation(population, profits, weights, capacity);
+population = Chromosome.sortPopulation(population);
+//Chromosome.printPopulation(population);
+best_solution_so_far=population[0].profit;
+System.out.println("best_solution_so_far: "+best_solution_so_far);
+
+
+while(counter<stop_iteration) {
+	Chromosome.defineChromosomesRanges(population);
+	population = Chromosome.breedPopulation(population, child_per_breed, profits, weights, capacity);
+	//Chromosome.printPopulation(population);
+	if(best_solution_so_far == population[0].profit) {
+		counter++;
+	}
+	else {
+		best_solution_so_far = population[0].profit;
+		System.out.println("best_solution_so_far: "+best_solution_so_far+" after "+counter+" iterations");
+		counter=0;
+	}
+}
+System.out.println("The best solution found is: "+best_solution_so_far);
+Chromosome.printChromosome(population[0]);
 }
 
 
