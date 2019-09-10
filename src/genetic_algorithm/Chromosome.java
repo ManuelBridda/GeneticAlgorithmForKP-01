@@ -198,34 +198,29 @@ public static void copyChromosome(Chromosome target, Chromosome source) {
  * @return
  */
 public static Chromosome crossOverandMutate(Chromosome parent1, Chromosome parent2) {
-	int crossing_point = ((int)(Math.round(Math.random()*(parent1.chromosome.length-2))))+1;
-	//System.out.println(crossing_point);
 	Chromosome child = new Chromosome();
-	
-	child.chromosome = new int[parent1.chromosome.length];
-	for(int i=0; i<crossing_point; i++) {
-		child.chromosome[i]=parent1.chromosome[i];
-	}
-	for(int i=crossing_point;i<parent1.chromosome.length;i++) {
-		child.chromosome[i]=parent2.chromosome[i];
-	}
-	/*for(int i=0; i<child.chromosome.length;i++) {   	//debug only
-		System.out.print("["+child.chromosome[i]+"]");
-	}
-	System.out.println("");*/
-	boolean changed = false;
-	while (!changed) {
-		int position = (int)Math.round(Math.random()*(child.chromosome.length-1));
-		if (child.chromosome[position] == 0) {
-			child.chromosome[position] = 1;
-			changed=true;
+	try {
+		int crossing_point = ((int)(Math.round(Math.random()*(parent1.chromosome.length-2))))+1;
+		//System.out.println(crossing_point);
+		
+		child.chromosome = new int[parent1.chromosome.length];
+		for(int i=0; i<crossing_point; i++) {
+			child.chromosome[i]=parent1.chromosome[i];
+		}
+		for(int i=crossing_point;i<parent1.chromosome.length;i++) {
+			child.chromosome[i]=parent2.chromosome[i];
+		}
+		boolean changed = false;
+		while (!changed) {
+			int position = (int)Math.round(Math.random()*(child.chromosome.length-1));
+			if (child.chromosome[position] == 0) {
+				child.chromosome[position] = 1;
+				changed=true;
+			}
 		}
 	}
-	/*for(int i=0; i<child.chromosome.length;i++) {   	//debug only
-		System.out.print("["+child.chromosome[i]+"]");
+catch (Exception e) {
 	}
-	System.out.println("");
-	System.out.println("");*/
 	return child;
 }
 
