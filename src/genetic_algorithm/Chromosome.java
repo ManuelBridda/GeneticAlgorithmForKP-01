@@ -1,4 +1,5 @@
 package genetic_algorithm;
+import java.util.*; 
 
 public class Chromosome {
 	int[] chromosome ;
@@ -134,20 +135,124 @@ public static void defineChromosomesRanges(Chromosome[] population) {
 	}
 }
 
-
-
-/*public static Chromosome[] sortPopulation(Chromosome[] population, int [] profits) {
-	int [] total_profit = new int[population.length];
-	for(int i=0; i<population.length; i++) {
-		tota
-		l_profit[i] =0;
-		for (int j=0; j<population[i].chromosome.length;j++) {
-			total_profit[i] += population[i].chromosome[j]*profits[j];
-			}
+/**Given the instance parameters, perform Roulette Wheel Selection, cross_over, mutation, validation on the current population and returns the population with childs
+ * @param population
+ * @param child_number
+ * @param profits
+ * @param weights
+ * @param capacity
+ * @return new_population
+ */
+public static Chromosome[] breedPopulation(Chromosome[] population, int child_number, int[] profits, int[] weights, int capacity) {
+	
+	Chromosome[] new_population = new Chromosome[population.length+child_number];
+	for (int i=0; i< population.length; i++) {
+		new_population[i] = population[i];
 	}
-	//Arrays.sort
-	return population;
-}*/
+	for (int j=population.length; j<population.length+child_number;j++) {
+		double random_number1 = Math.random();
+		double random_number2 = Math.random();
+		Chromosome parent1 = new Chromosome();
+		Chromosome parent2 = new Chromosome();
+		for (int i=0; i< population.length; i++) {
+			if (population[i].range_lower_bound<=random_number1 && population[i].range_upper_bound>=random_number1)
+				copyChromosome(parent1,population[i]);
+			if (population[i].range_lower_bound<=random_number2 && population[i].range_upper_bound>=random_number2)
+				copyChromosome(parent2,population[i]);
+			}
+		new_population[j]=crossOverandMutate(parent1,parent2);
+		new_population[j].weight=0;
+		new_population[j].profit=0;
+		for(int i=0;i<new_population[j].chromosome.length;i++) {
+			new_population[j].weight+=new_population[j].chromosome[i]*weights[i];
+			new_population[j].profit+=new_population[j].chromosome[i]*profits[i];
+			}	
+	}
+	validateChromosomePopulation(new_population, profits, weights, capacity);
+	return reducePopulation(new_population, population.length);
+	}
+
+/**Copy the chromosome property of a source in the target
+ * @param target
+ * @param source
+ */
+public static void copyChromosome(Chromosome target, Chromosome source) {
+	target.chromosome = new int[source.chromosome.length];
+	for (int i=0; i<source.chromosome.length;i++) {
+		target.chromosome[i]=source.chromosome[i];
+	}
+}
+
+/**Given two parents, perform the cross_over phase in a random cross_point and get a child, then mutate the child by adding 1 in a random way
+ * @param parent1
+ * @param parent2
+ * @return
+ */
+public static Chromosome crossOverandMutate(Chromosome parent1, Chromosome parent2) {
+	int crossing_point = ((int)(Math.round(Math.random()*(parent1.chromosome.length-2))))+1;
+	//System.out.println(crossing_point);
+	Chromosome child = new Chromosome();
+	
+	child.chromosome = new int[parent1.chromosome.length];
+	for(int i=0; i<crossing_point; i++) {
+		child.chromosome[i]=parent1.chromosome[i];
+	}
+	for(int i=crossing_point;i<parent1.chromosome.length;i++) {
+		child.chromosome[i]=parent2.chromosome[i];
+	}
+	/*for(int i=0; i<child.chromosome.length;i++) {   	//debug only
+		System.out.print("["+child.chromosome[i]+"]");
+	}
+	System.out.println("");*/
+	boolean changed = false;
+	while (!changed) {
+		int position = (int)Math.round(Math.random()*(child.chromosome.length-1));
+		if (child.chromosome[position] == 0) {
+			child.chromosome[position] = 1;
+			changed=true;
+		}
+	}
+	/*for(int i=0; i<child.chromosome.length;i++) {   	//debug only
+		System.out.print("["+child.chromosome[i]+"]");
+	}
+	System.out.println("");
+	System.out.println("");*/
+	return child;
+}
+
+public static Chromosome[] sortPopulation(Chromosome[] population) {
+	List<Chromosome> population_list = new ArrayList<Chromosome> (Arrays.asList(population));
+	Collections.sort(population_list,(a1, a2) -> a1.profit-a2.profit);
+	Collections.reverse(population_list);
+	Chromosome[] sortedPopulation= new Chromosome[population.length];
+	for (int i=0;i<population.length;i++) {
+		sortedPopulation[i] = new Chromosome();
+		sortedPopulation[i].chromosome = new int[population[i].chromosome.length];
+		sortedPopulation[i].profit=population_list.get(i).profit;
+		sortedPopulation[i].weight=population_list.get(i).weight;
+		for (int j=0; j<population[i].chromosome.length;j++) {
+			sortedPopulation[i].chromosome[j]=population_list.get(i).chromosome[j];
+		}
+	}
+	return sortedPopulation;
+	
+}
+public static Chromosome[] reducePopulation(Chromosome[] population, int population_dimension) {
+	List<Chromosome> population_list = new ArrayList<Chromosome> (Arrays.asList(population));
+	Collections.sort(population_list,(a1, a2) -> a1.profit-a2.profit);
+	Collections.reverse(population_list);
+	Chromosome[] reducedPopulation= new Chromosome[population_dimension];
+	for (int i=0;i<population_dimension;i++) {
+		reducedPopulation[i] = new Chromosome();
+		reducedPopulation[i].chromosome = new int[population[i].chromosome.length];
+		reducedPopulation[i].profit=population_list.get(i).profit;
+		reducedPopulation[i].weight=population_list.get(i).weight;
+		for (int j=0; j<population[i].chromosome.length;j++) {
+			reducedPopulation[i].chromosome[j]=population_list.get(i).chromosome[j];
+		}
+	}
+	return reducedPopulation;
+}
 
 
 }
