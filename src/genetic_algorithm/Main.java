@@ -6,8 +6,8 @@ public class Main {
 		// Instance Parameters
 		
 		int instance_dimension = 20;
-		int population_dimension = 1000;
-		int child_per_breed =50;
+		int population_dimension = 100;
+		int number_of_breed =50; //2 children per breed
 		int stop_iteration = 200;
 		
 		int [] profits= {16, 30, 40, 28, 14, 36, 33, 37, 46, 13, 34, 45, 5, 29, 39, 41, 42, 9, 15, 31};
@@ -17,7 +17,7 @@ public class Main {
 		
 		
 		//Computations
-		Chromosome.resolveProblem(population_dimension, instance_dimension, profits, weights, capacity, child_per_breed, stop_iteration);
+		Chromosome.resolveProblem(population_dimension, instance_dimension, profits, weights, capacity, number_of_breed, stop_iteration);
 		
 	}
 	

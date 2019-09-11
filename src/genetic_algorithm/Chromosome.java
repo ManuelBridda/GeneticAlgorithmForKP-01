@@ -55,6 +55,7 @@ public static void printChromosome(Chromosome chromosome) {
 	for (int j=0; j<chromosome.chromosome.length;j++) {
 		System.out.print("["+chromosome.chromosome[j]+"]");
 	}
+	System.out.println("");
 }
 
 /**Given a population of Chromosomes, list all the genes of each Chromosome in a fancy way with information about 
@@ -144,21 +145,21 @@ public static void defineChromosomesRanges(Chromosome[] population) {
 	}
 }
 
-/**Given the instance parameters, perform Roulette Wheel Selection, cross_over, mutation, validation on the current population and returns the population with childs
+/**Given the instance parameters, perform Roulette Wheel Selection, cross_over, mutation, validation on the current population and returns the population with children
  * @param population
- * @param child_number
+ * @param number_of_breed
  * @param profits
  * @param weights
  * @param capacity
  * @return new_population
  */
-public static Chromosome[] breedPopulation(Chromosome[] population, int child_number, int[] profits, int[] weights, int capacity) {
+public static Chromosome[] breedPopulation(Chromosome[] population, int number_of_breed, int[] profits, int[] weights, int capacity) {
 	
-	Chromosome[] new_population = new Chromosome[population.length+child_number];
+	Chromosome[] new_population = new Chromosome[population.length+number_of_breed*2];
 	for (int i=0; i< population.length; i++) {
 		new_population[i] = population[i];
 	}
-	for (int j=population.length; j<population.length+child_number;j++) {
+	for (int j=population.length; j<population.length+number_of_breed*2;j++) {
 		double random_number1 = Math.random();
 		double random_number2 = Math.random();
 		Chromosome parent1 = new Chromosome();
@@ -169,13 +170,22 @@ public static Chromosome[] breedPopulation(Chromosome[] population, int child_nu
 			if (population[i].range_lower_bound<=random_number2 && population[i].range_upper_bound>=random_number2)
 				copyChromosome(parent2,population[i]);
 			}
-		new_population[j]=crossOverandMutate(parent1,parent2);
+		Chromosome[] children = new Chromosome[2];
+		children = crossOverandMutate(parent1,parent2);
+		new_population[j]=children[0];
+		new_population[j+1]=children[1];
 		new_population[j].weight=0;
 		new_population[j].profit=0;
+		new_population[j+1].weight=0;
+		new_population[j+1].profit=0;
 		for(int i=0;i<new_population[j].chromosome.length;i++) {
 			new_population[j].weight+=new_population[j].chromosome[i]*weights[i];
 			new_population[j].profit+=new_population[j].chromosome[i]*profits[i];
-			}	
+			new_population[j+1].weight+=new_population[j+1].chromosome[i]*weights[i];
+			new_population[j+1].profit+=new_population[j+1].chromosome[i]*profits[i];
+			}
+		j++;
+
 	}
 	validateChromosomePopulation(new_population, profits, weights, capacity);
 	return reducePopulation(new_population, population.length);
@@ -197,24 +207,37 @@ public static void copyChromosome(Chromosome target, Chromosome source) {
  * @param parent2
  * @return
  */
-public static Chromosome crossOverandMutate(Chromosome parent1, Chromosome parent2) {
-	Chromosome child = new Chromosome();
+public static Chromosome[] crossOverandMutate(Chromosome parent1, Chromosome parent2) {
+	Chromosome[] child = new Chromosome[2];
+	child[0] = new Chromosome ();
+	child[1] = new Chromosome ();
 	try {
 		int crossing_point = ((int)(Math.round(Math.random()*(parent1.chromosome.length-2))))+1;
 		//System.out.println(crossing_point);
 		
-		child.chromosome = new int[parent1.chromosome.length];
+		child[0].chromosome = new int[parent1.chromosome.length];
+		child[1].chromosome = new int[parent1.chromosome.length];
 		for(int i=0; i<crossing_point; i++) {
-			child.chromosome[i]=parent1.chromosome[i];
+			child[0].chromosome[i]=parent1.chromosome[i];
+			child[1].chromosome[i]=parent2.chromosome[i];
 		}
 		for(int i=crossing_point;i<parent1.chromosome.length;i++) {
-			child.chromosome[i]=parent2.chromosome[i];
+			child[0].chromosome[i]=parent2.chromosome[i];
+			child[1].chromosome[i]=parent1.chromosome[i];
 		}
 		boolean changed = false;
 		while (!changed) {
-			int position = (int)Math.round(Math.random()*(child.chromosome.length-1));
-			if (child.chromosome[position] == 0) {
-				child.chromosome[position] = 1;
+			int position = (int)Math.round(Math.random()*(child[0].chromosome.length-1));
+			if (child[0].chromosome[position] == 0) {
+				child[0].chromosome[position] = 1;
+				changed=true;
+			}
+		}
+		changed = false;
+		while (!changed) {
+			int position = (int)Math.round(Math.random()*(child[1].chromosome.length-1));
+			if (child[1].chromosome[position] == 0) {
+				child[1].chromosome[position] = 1;
 				changed=true;
 			}
 		}
@@ -275,10 +298,10 @@ public static Chromosome[] reducePopulation(Chromosome[] population, int populat
  * @param profits
  * @param weights
  * @param capacity
- * @param child_per_breed
+ * @param number_of_breed
  * @param stop_iteration
  */
-public static void resolveProblem(int population_dimension, int instance_dimension, int[] profits, int[] weights, int capacity, int child_per_breed, int stop_iteration) {
+public static void resolveProblem(int population_dimension, int instance_dimension, int[] profits, int[] weights, int capacity, int number_of_breed, int stop_iteration) {
 	int counter = 0;
 	int best_solution_so_far=0;
 	Chromosome[] population = Chromosome.buildChromosomePopulation(population_dimension,instance_dimension,profits,weights);
@@ -290,7 +313,7 @@ public static void resolveProblem(int population_dimension, int instance_dimensi
 
 	while(counter<stop_iteration) {
 		Chromosome.defineChromosomesRanges(population);
-		population = Chromosome.breedPopulation(population, child_per_breed, profits, weights, capacity);
+		population = Chromosome.breedPopulation(population, number_of_breed, profits, weights, capacity);
 		//Chromosome.printPopulation(population);
 		if(best_solution_so_far == population[0].profit) {
 			counter++;
