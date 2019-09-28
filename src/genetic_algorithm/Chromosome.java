@@ -233,8 +233,7 @@ public static Chromosome[] breedPopulation(Chromosome[] population, int number_o
 		Random rd2 = new Random();
 		float random_number1 = rd1.nextFloat();
 		float random_number2 =rd2.nextFloat();
-		/**For some reasons, sometimes, parent1 or parent2 are not defined
-		 * To solve this parent1 and 2 are just created randomly and are overwrited after.
+		/**To avoid possible Nulls parent1 and 2 are just created randomly and are overwritten after. 
 		 */
 		Chromosome parent1 = new Chromosome(); //buildChromosome(population[0].chromosome.length, profits, weights);
 		Chromosome parent2 = new Chromosome();//buildChromosome(population[0].chromosome.length, profits, weights);
