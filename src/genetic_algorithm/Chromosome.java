@@ -8,6 +8,27 @@ public class Chromosome {
 	float range_lower_bound;
 	float range_upper_bound;
 
+	
+/**Given a Knapsack instance, return it ordered by density (profit/weight)
+ * @param instance
+ * @return sorted population
+ */
+public static int[][] sortInstance(int[][] instance) {
+	double[][] instancedoubled = new double[instance.length][2];
+	for(int i=0; i<instance.length;i++) {
+		instancedoubled[i][0]=instance[i][0];
+		instancedoubled[i][1]=instance[i][1];
+	}
+		List<double[]> instance_list = new ArrayList<double[]> (Arrays.asList(instancedoubled));
+		Collections.sort(instance_list,(a1, a2) -> Double.compare(a1[1]/a1[0],(a2[1]/a2[0])));
+		int[][] sortedInstance= new int[instance.length][2];
+		for (int i=0;i<instance.length;i++) {
+			sortedInstance[i][0]=(int)instance_list.get(i)[0];
+			sortedInstance[i][1]=(int)instance_list.get(i)[1];
+		}
+		return sortedInstance;
+		
+}
 
 /**Initialize a random sequence of 0-1 values: the genes of a Chromosome. 
  * The instance_dimension value is equal to the sequence lenght of the Chromosome.
@@ -30,7 +51,7 @@ public static Chromosome buildChromosome(int instance_dimension, int[] profits, 
 	return x;
 }
 
-/**Initialize a population of population_dimension Chromosomes whose genes lenght is equal to instance_dimension
+/**Initialize a population of population_dimension Chromosomes whose genes length is equal to instance_dimension
  * @param population_dimension
  * @param instance_dimension
  * @param profits
@@ -73,7 +94,7 @@ public static void printPopulation(Chromosome[] population) {
 	}
 }
 
-/**Given a population of Chromosomes, randomly modificy each Chromosome for being feasibile to the capacity
+/**Given a population of Chromosomes, randomly modify each Chromosome for being feasible to the capacity
  * constraint of the Knapsack Problem
  * @param population
  * @param profits
@@ -82,7 +103,7 @@ public static void printPopulation(Chromosome[] population) {
  * @return Chromosome []
  */
 public static Chromosome[] validateChromosomePopulation(Chromosome[] population, int[] profits, int[] weights, int capacity) {
-	
+
 	for (int i=0; i<population.length; i++) {
 		int totalweight = 0;
 		for (int j=0; j<population[i].chromosome.length;j++) {
@@ -93,11 +114,32 @@ public static Chromosome[] validateChromosomePopulation(Chromosome[] population,
 			for (int j=0; j<population[i].chromosome.length;j++) {
 				totalweight += population[i].chromosome[j]*weights[j];
 				}
-			population[i] = validateChromosome(population[i],profits,weights,capacity);
+			population[i] = validateChromosomeGreedy(population[i],profits,weights); //works only with a set ordered by density
+			//population[i] = validateChromosomeRandom(population[i],profits,weights); //works with any set
 		}
+		//optional
+		population[i]=addBestItem(population[i], profits, weights, capacity); //works only with a set ordered by density
+		
+		
 	}
 	return population;
 	
+}
+
+public static Chromosome addBestItem(Chromosome chromosome,int [] profits, int [] weights, int capacity) {
+	int totalweight = 0;
+	for (int j=0; j<chromosome.chromosome.length;j++) {
+		totalweight += chromosome.chromosome[j]*weights[j];
+		}
+	int residual_capacity = capacity-totalweight;
+	for (int i=0; i<chromosome.chromosome.length;i++)
+		if(weights[i]<=residual_capacity && chromosome.chromosome[i]==0) {
+			chromosome.chromosome[i]=1;
+			chromosome.profit+=profits[i];
+			chromosome.weight+=weights[i];
+			break;
+		}
+	return chromosome;
 }
 
 /**Given a Chromosome, randomly modify it for being feasible to the capacity
@@ -108,7 +150,7 @@ public static Chromosome[] validateChromosomePopulation(Chromosome[] population,
  * @param capacity
  * @return Chromosome
  */
-public static Chromosome validateChromosome(Chromosome wrong_chromosome, int[] profits, int [] weights, int capacity) {
+public static Chromosome validateChromosomeRandom(Chromosome wrong_chromosome, int[] profits, int [] weights) {
 	boolean changed = false;
 	while (!changed) {
 		int position = (int)Math.round(Math.random()*(wrong_chromosome.chromosome.length-1));
@@ -123,6 +165,32 @@ public static Chromosome validateChromosome(Chromosome wrong_chromosome, int[] p
 			wrong_chromosome.weight+=wrong_chromosome.chromosome[i]*weights[i];
 			wrong_chromosome.profit+=wrong_chromosome.chromosome[i]*profits[i];
 		}
+	}
+	return wrong_chromosome;
+}
+
+/**Given a Chromosome, randomly modify it for being feasible to the capacity
+ * 
+ * @param wrong_chromosome
+ * @param profits
+ * @param weights
+ * @return
+ */
+public static Chromosome validateChromosomeGreedy(Chromosome wrong_chromosome, int[] profits, int [] weights) {
+	
+	for(int i=wrong_chromosome.chromosome.length-1; i >=0; i--) {
+		if (wrong_chromosome.chromosome[i]==1) {
+			wrong_chromosome.chromosome[i]=0;
+			break;
+		}
+		
+	}
+	wrong_chromosome.weight=0;
+	wrong_chromosome.profit=0;
+	
+	for(int i=0; i<wrong_chromosome.chromosome.length; i++) {
+		wrong_chromosome.weight+=wrong_chromosome.chromosome[i]*weights[i];
+		wrong_chromosome.profit+=wrong_chromosome.chromosome[i]*profits[i];
 	}
 	return wrong_chromosome;
 }
@@ -143,6 +211,7 @@ public static void defineChromosomesRanges(Chromosome[] population) {
 		population[i].range_upper_bound=population[i].range_lower_bound+population[i].profit/total_profit;
 	//System.out.println("["+population[i].range_lower_bound+","+population[i].range_upper_bound+"]");  //debug only
 	}
+	population[population.length-1].range_upper_bound=1;
 }
 
 /**Given the instance parameters, perform Roulette Wheel Selection, cross_over, mutation, validation on the current population and returns the population with children
@@ -159,15 +228,20 @@ public static Chromosome[] breedPopulation(Chromosome[] population, int number_o
 	for (int i=0; i< population.length; i++) {
 		new_population[i] = population[i];
 	}
-	for (int j=population.length; j<population.length+number_of_breed*2;j++) {
-		double random_number1 = Math.random();
-		double random_number2 = Math.random();
-		Chromosome parent1 = new Chromosome();
-		Chromosome parent2 = new Chromosome();
+	for (int j=population.length; j<population.length+(number_of_breed*2)-1;j=j+2) {
+		Random rd1 = new Random();
+		Random rd2 = new Random();
+		float random_number1 = rd1.nextFloat();
+		float random_number2 =rd2.nextFloat();
+		/**For some reasons, sometimes, parent1 or parent2 are not defined
+		 * To solve this parent1 and 2 are just created randomly and are overwrited after.
+		 */
+		Chromosome parent1 = new Chromosome(); //buildChromosome(population[0].chromosome.length, profits, weights);
+		Chromosome parent2 = new Chromosome();//buildChromosome(population[0].chromosome.length, profits, weights);
 		for (int i=0; i< population.length; i++) {
-			if (population[i].range_lower_bound<=random_number1 && population[i].range_upper_bound>=random_number1)
+			if (population[i].range_lower_bound<=random_number1 && population[i].range_upper_bound>random_number1)
 				copyChromosome(parent1,population[i]);
-			if (population[i].range_lower_bound<=random_number2 && population[i].range_upper_bound>=random_number2)
+			if (population[i].range_lower_bound<=random_number2 && population[i].range_upper_bound>random_number2)
 				copyChromosome(parent2,population[i]);
 			}
 		Chromosome[] children = new Chromosome[2];
@@ -178,14 +252,22 @@ public static Chromosome[] breedPopulation(Chromosome[] population, int number_o
 		new_population[j].profit=0;
 		new_population[j+1].weight=0;
 		new_population[j+1].profit=0;
-		for(int i=0;i<new_population[j].chromosome.length;i++) {
+		try{for(int i=0;i<new_population[j].chromosome.length;i++) {
 			new_population[j].weight+=new_population[j].chromosome[i]*weights[i];
 			new_population[j].profit+=new_population[j].chromosome[i]*profits[i];
 			new_population[j+1].weight+=new_population[j+1].chromosome[i]*weights[i];
 			new_population[j+1].profit+=new_population[j+1].chromosome[i]*profits[i];
 			}
-		j++;
-
+		}
+	catch(NullPointerException e) {
+		System.out.println(population[population.length-1].range_lower_bound);
+		System.out.println(population[population.length-1].range_upper_bound);
+		System.out.println(random_number1);
+		System.out.println(random_number2);
+		printChromosome(parent1);
+		printChromosome(parent2);
+	}
+	
 	}
 	validateChromosomePopulation(new_population, profits, weights, capacity);
 	return reducePopulation(new_population, population.length);
@@ -302,13 +384,13 @@ public static Chromosome[] reducePopulation(Chromosome[] population, int populat
  * @param stop_iteration
  */
 public static void resolveProblem(int population_dimension, int instance_dimension, int[] profits, int[] weights, int capacity, int number_of_breed, int stop_iteration) {
-	int counter = 0;
+	int counter = 1;
 	int best_solution_so_far=0;
 	Chromosome[] population = Chromosome.buildChromosomePopulation(population_dimension,instance_dimension,profits,weights);
 	population = Chromosome.validateChromosomePopulation(population, profits, weights, capacity);
 	population = Chromosome.sortPopulation(population);
 	best_solution_so_far=population[0].profit;
-	System.out.println("Best solution so far: "+best_solution_so_far);
+	System.out.println("Initial solution: "+best_solution_so_far);
 
 
 	while(counter<stop_iteration) {
@@ -321,7 +403,8 @@ public static void resolveProblem(int population_dimension, int instance_dimensi
 		else {
 			best_solution_so_far = population[0].profit;
 			System.out.println("Best solution so far = "+best_solution_so_far+" after "+counter+" iterations");
-			counter=0;
+			counter=1;
+			//printPopulation(population);
 			}
 		}
 	System.out.println("<<Stopped after "+counter+ " iterations without solution's value improvement>>\n");
