@@ -1,6 +1,7 @@
 package genetic_algorithm;
 import java.util.*; 
 
+
 public class Chromosome {
 	int[] chromosome ; 
 	int profit=0;
@@ -114,8 +115,10 @@ public static Chromosome[] validateChromosomePopulation(Chromosome[] population,
 			for (int j=0; j<population[i].chromosome.length;j++) {
 				totalweight += population[i].chromosome[j]*weights[j];
 				}
+			if(totalweight!= 0) {
 			population[i] = validateChromosomeGreedy(population[i],profits,weights); //works only with a set ordered by density
 			//population[i] = validateChromosomeRandom(population[i],profits,weights); //works with any set
+			}
 		}
 		//optional
 		population[i]=addBestItem(population[i], profits, weights, capacity); //works only with a set ordered by density
@@ -394,6 +397,7 @@ public static void resolveProblem(int population_dimension, int instance_dimensi
 
 	while(counter<stop_iteration) {
 		Chromosome.defineChromosomesRanges(population);
+		
 		population = Chromosome.breedPopulation(population, number_of_breed, profits, weights, capacity);
 		//Chromosome.printPopulation(population);
 		if(best_solution_so_far == population[0].profit) {
