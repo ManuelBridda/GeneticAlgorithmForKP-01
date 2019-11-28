@@ -5,10 +5,10 @@ public class Main {
 
 	public static void main(String[] args) {
 		// Instance Parameters
-		int population_dimension = 500;
-		int number_of_breed = 250 ; //2 children per breed
+		int population_dimension = 300;
+		int number_of_breed = 150 ; //2 children per breed
 		int stop_iteration = 2000;
-		int[][] instance = { {
+		int[][] instance500 = { {
 		500, 2543},{
 		94, 485},{
 		506, 326},{
@@ -510,7 +510,7 @@ public class Main {
 		678, 138},{
 		123, 334},{
 		212, 988}};
-		/*int[][] instance = { 
+		int[][] instance200 = { 
 		{200, 1008},{
 		94 ,485},{
 		506, 326},{
@@ -711,8 +711,8 @@ public class Main {
 		380 ,225},{
 		712 ,823},{
 		266 ,164},{
-		216, 343}};*/
-		/**int[][] instance = {  
+		216, 343}};
+		int[][] instance100 = {  
 	//{Profit, Weight}
 		{100, 995},
 		{94, 485},
@@ -814,21 +814,27 @@ public class Main {
 		{737, 391},
 		{324, 330},
 		{992, 298},
-		{224, 790}};*/
+		{224, 790}};
 		
+		//INSTANCE SELECTION
+		int[][] instance = instance500;
+		//int[][] instance = instance200;
+		//int[][] instance = instance100;
+		
+		//SORTING(REQUIRED BY MOST LOCAL SEARCH METHOD
 		instance = Chromosome.sortInstance(instance);
-		/*for(int i=0; i<instance.length;i++){
-			System.out.println("["+instance[i][0]+","+instance[i][1]+"]"+instance[i][0]/instance[i][1]);
-		}*/
+		
+		//PROFIT AND WEIGHT ARRAY DEFINITION
 		int [] profits=new int[instance.length];
 		int [] weights=new int[instance.length];
 		for(int i=0; i< instance.length;i++) {
 			profits[i]=instance[i][0];
 			weights[i]=instance[i][1];
 		}
+		//SET CAPACITY
 		int capacity = 1000;
 		
-		//Computations
+		//COMPUTATIONS
 		long millis = System.nanoTime();
 		Chromosome.resolveProblem(population_dimension, instance.length, profits, weights, capacity, number_of_breed, stop_iteration);
 		System.out.println("Tempo impiegato: "+(System.nanoTime()-millis)/1000000+" ms");
